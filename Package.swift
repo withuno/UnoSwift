@@ -11,24 +11,23 @@ let package = Package(
     products: [
         .library(
             name: "UnoSwift",
-            targets: ["UnoSwift"]),
+            targets: ["Uno"]),
     ],
     targets: [
         .target(
-            name: "UnoSwift",
+            name: "Uno",
             dependencies: ["C"],
-            path: "Sources/UnoSwift",
-            sources: ["Uno.swift"]),
+            path: "Sources/Swift"),
         .target(
             name: "C",
-            dependencies: ["UnoStatic"],
+            dependencies: ["UnoRust"],
             path: "Sources/C"),
         .binaryTarget(
-            name: "UnoStatic",
+            name: "UnoRust",
             path: "Libs/UnoRust.xcframework"),
         .testTarget(
             name: "Uno-Tests",
-            dependencies: ["UnoSwift"]),
-    ]//,
-    //swiftLanguageVersions: [.version("5.5")]
+            dependencies: ["Uno"],
+            path: "Tests/Swift"),
+    ]
 )
