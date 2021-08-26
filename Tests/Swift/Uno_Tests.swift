@@ -4,19 +4,19 @@ import XCTest
 final class Functional: XCTestCase {
     func testIdInit() {
         let bytes = Array<UInt8>(repeating: 0, count: 32)
-        let id = try? Uno.Id(data: bytes)
+        let id = try? Uno.ID(data: bytes)
         XCTAssertNotNil(id)
     }
 
     func testIdFail() {
         let bytes = Array<UInt8>(repeating: 0, count: 31)
-        let id = try? Uno.Id(data: bytes)
+        let id = try? Uno.ID(data: bytes)
         XCTAssertNil(id)
     }
 
     func testS39roundtrip() {
         let bytes = Array<UInt8>(repeating: 1, count: 32)
-        let id = try? Uno.Id(data: bytes)
+        let id = try? Uno.ID(data: bytes)
         XCTAssertNotNil(id)
 
         let specs = [

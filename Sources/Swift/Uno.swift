@@ -17,7 +17,7 @@ import C
 /// An uno Id is a 32 byte entropy seed used to derive various keys for use
 /// within the uno application.
 ///
-public class Id {
+public class ID {
     let ptr: OpaquePointer
 
     ///
@@ -27,7 +27,7 @@ public class Id {
         var ptr: OpaquePointer?
         let ret = C.uno_get_id_from_bytes(data, data.count, &ptr)
         if ret > 0 {
-            throw Err.Code(ret)
+            throw Err.code(ret)
         }
         self.init(ptr!)
     }
@@ -47,7 +47,7 @@ public class Id {
             var out = Array<UInt8>(repeating: 0, count: 32)
             let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
             if ret > 0 {
-                throw Err.Code(ret)
+                throw Err.code(ret)
             }
             return out
         }
@@ -56,16 +56,16 @@ public class Id {
 
 public enum Err: Error {
     // An error from the underlying C ffi library.
-    case Code(Int32)
-    case Invalid
+    case code(Int32)
+    case invalid
 
     public var details: String {
         get {
             switch self {
-            case .Code(let c):
+            case .code(let c):
                 let ptr = C.uno_get_msg_from_err(c)!
                 return String(cString: ptr)
-            case .Invalid:
+            case .invalid:
                 return "uno-swift: invalid value"
             }
         }
@@ -103,18 +103,15 @@ public struct S39 {
 
         /// The constituent member shares.
         public var shares: [Share] {
-            get throws {
-                var shares = Array<Share>()
-                for i in 0 ..< metadata.share_count {
-                    let idx = UInt8(i)
-                    var out =  UnoShare()
-                    let ret = C.uno_get_s93_share_by_index(metadata, idx, &out)
+            get throws { try
+                (0 ..< metadata.share_count).map(UInt8.init).map {
+                    var out = UnoShare()
+                    let ret = C.uno_get_s93_share_by_index(metadata, $0, &out)
                     if ret > 0 {
-                        throw Err.Code(ret)
+                        throw Err.code(ret)
                     }
-                    shares.append(Share(out))
+                    return Share(out)
                 }
-                return shares
             }
         }
     }
@@ -128,9 +125,9 @@ public struct S39 {
     public class Share {
         public typealias Metadata = C.UnoShareMetadata
 
-        let c_share: C.UnoShare
+        private let cShare: C.UnoShare
 
-        var _metadata: Metadata?
+        private var _metadata: Metadata?
 
         // TODO: make this type of thing possible
 //        public convenience init(mnemonic: String) throws {
@@ -143,16 +140,16 @@ public struct S39 {
 //        }
 
         init(_ c: C.UnoShare) {
-            self.c_share = c
+            self.cShare = c
         }
 
         deinit {
             _metadata.map { C.uno_free_s39_share_metadata($0) }
-            C.uno_free_s39_share(c_share)
+            C.uno_free_s39_share(cShare)
         }
 
         /// The slip-0039 mnemonic (string of 33 words) form of the share.
-        public lazy var mnemonic = String(cString: c_share.mnemonic)
+        public lazy var mnemonic = String(cString: cShare.mnemonic)
 
         /// Get additional information about the share. This call can fail if
         /// the backing library encounters an error.
@@ -162,9 +159,9 @@ public struct S39 {
                     return m
                 }
                 var out = Metadata()
-                let ret = C.uno_get_s39_share_metadata(c_share, &out)
+                let ret = C.uno_get_s39_share_metadata(cShare, &out)
                 if ret > 0 {
-                    throw Err.Code(ret)
+                    throw Err.code(ret)
                 }
                 self._metadata = out
                 return out
@@ -176,41 +173,39 @@ public struct S39 {
     /// Shard an uno ID into different pieces according to the provided Spec
     /// list.
     ///
-    public static func split(id: Id, specs: [Spec]) throws -> [Group] {
+    public static func split(id: ID, specs: [Spec]) throws -> [Group] {
         var out: OpaquePointer?
         let ret = C.uno_s39_split(id.ptr, 1, specs, 1, &out)
         if ret > 0 {
-            throw Err.Code(ret)
+            throw Err.code(ret)
         }
         let usr = out! // UnoSplitResult
         defer { C.uno_free_split_result(usr) }
 
-        var groups = Array<Group>()
-        for i in 0 ..< specs.count {
+        return try specs.enumerated().map {
             var ugs = UnoGroupSplit()
-            let ret = C.uno_get_group_from_split_result(usr, i, &ugs)
+            let ret = C.uno_get_group_from_split_result(usr, $0.0, &ugs)
             if ret > 0 {
-                throw Err.Code(ret)
+                throw Err.code(ret)
             }
-            groups.append(Group(ugs))
+            return Group(ugs)
         }
-        return groups
     }
 
     ///
     /// Reconstitute an uno ID previously split into a group of shares.
     ///
-    public static func combine(shares: [String]) throws -> Id {
+    public static func combine(shares: [String]) throws -> ID {
         var out: OpaquePointer?
         let ret = withArrayOfCStrings(shares) { arr -> Int32 in
             let const_arr = arr.map { UnsafePointer($0) }
             return C.uno_s39_combine(const_arr, shares.count, &out)
         }
         if ret > 0 {
-            throw Err.Code(ret)
+            throw Err.code(ret)
         }
         let id = out! // UnoId
-        return Id(id)
+        return ID(id)
     }
 
     // TODO: make this type of thing possible
@@ -241,14 +236,14 @@ func withArrayOfCStrings<R>(
     let argsOffsets = [ 0 ] + scan(argsCounts, 0, +)
     let argsBufferSize = argsOffsets.last!
 
-    var argsBuffer: [UInt8] = []
+    var argsBuffer = [UInt8]()
     argsBuffer.reserveCapacity(argsBufferSize)
     for arg in args {
         argsBuffer.append(contentsOf: arg.utf8)
         argsBuffer.append(0)
     }
 
-    return argsBuffer.withUnsafeMutableBufferPointer { (argsBuffer) in
+    return argsBuffer.withUnsafeMutableBufferPointer { argsBuffer in
         let ptr = UnsafeMutableRawPointer(argsBuffer.baseAddress!).bindMemory(
             to: CChar.self,
             capacity: argsBuffer.count
