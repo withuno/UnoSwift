@@ -1,4 +1,4 @@
-// swift-tools-version:5.4
+// swift-tools-version:5.5
 
 import PackageDescription
 
@@ -29,5 +29,6 @@ let package = Package(
         .testTarget(
             name: "Uno-Tests",
             dependencies: ["UnoSwift"]),
-    ]
+    ]//,
+    //swiftLanguageVersions: [.version("5.5")]
 )

@@ -4,13 +4,13 @@ import XCTest
 final class Functional: XCTestCase {
     func testIdInit() {
         let bytes = Array<UInt8>(repeating: 0, count: 32)
-        let id = UnoSwift.Id(data: bytes)
+        let id = try? UnoSwift.Id(data: bytes)
         XCTAssertNotNil(id)
     }
     
     func testIdFail() {
         let bytes = Array<UInt8>(repeating: 0, count: 31)
-        let id = UnoSwift.Id(data: bytes)
+        let id = try? UnoSwift.Id(data: bytes)
         XCTAssertNil(id)
     }
     

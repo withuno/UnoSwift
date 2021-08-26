@@ -219,7 +219,7 @@ int uno_get_id_from_bytes(const uint8_t *bytes, size_t len, const UnoId **out);
 
 /**
  *
- * Copy the raw 32 bytes backing an uno id.
+ * Copy the raw 32 bytes backing an uno Id into caller-owned memory.
  *
  */
 int uno_copy_id_bytes(const UnoId *uno_id, uint8_t *bytes, size_t len);
@@ -233,10 +233,10 @@ void uno_free_id(UnoId *id);
 
 /**
  *
- * Get the raw bytes backing an uno id.
+ * Get the raw bytes backing an uno Id.
  *
  */
-int uno_id_get_bytes(const UnoId *uno_id, UnoByteSlice *out);
+int uno_get_bytes_from_id(const UnoId *uno_id, UnoByteSlice *out);
 
 /**
  *
@@ -278,7 +278,7 @@ void uno_free_split_result(UnoSplitResult *split_result);
  */
 int uno_get_group_from_split_result(const UnoSplitResult *split_result,
                                     size_t index,
-                                    const UnoGroupSplit **out);
+                                    UnoGroupSplit *out);
 
 /**
  *
@@ -286,14 +286,14 @@ int uno_get_group_from_split_result(const UnoSplitResult *split_result,
  * `uno_get_group_from_split_result`.
  *
  */
-void uno_free_group_split(UnoGroupSplit *group_split);
+void uno_free_group_split(UnoGroupSplit group_split);
 
 /**
  *
  * Returns the actual member share by index.
  *
  */
-int uno_get_s93_share_by_index(const UnoGroupSplit *group_split,
+int uno_get_s93_share_by_index(UnoGroupSplit group_split,
                                uint8_t index,
                                UnoShare *out);
 
@@ -309,7 +309,7 @@ void uno_free_s39_share(UnoShare share);
  * Get the share metadata from an UnoShare.
  *
  */
-int uno_get_s39_share_metadata(const UnoShare *share, UnoShareMetadata *out);
+int uno_get_s39_share_metadata(UnoShare share, UnoShareMetadata *out);
 
 /**
  *
