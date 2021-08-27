@@ -42,15 +42,25 @@ public class ID {
     ///
     /// Get the bytes backing the uno Id.
     ///
-    public var bytes: [UInt8] {
-        get throws {
-            var out = Array<UInt8>(repeating: 0, count: 32)
-            let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
-            if ret > 0 {
-                throw Err.code(ret)
-            }
-            return out
+    // TODO: Swift 5.5
+//    public var bytes: [UInt8] {
+//        get throws {
+//            var out = Array<UInt8>(repeating: 0, count: 32)
+//            let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
+//            if ret > 0 {
+//                throw Err.code(ret)
+//            }
+//            return out
+//        }
+//    }
+
+    public func getBytes() throws -> [UInt8] {
+        var out = Array<UInt8>(repeating: 0, count: 32)
+        let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
+        if ret > 0 {
+            throw Err.code(ret)
         }
+        return out
     }
 }
 
@@ -102,16 +112,28 @@ public struct S39 {
         }
 
         /// The constituent member shares.
-        public var shares: [Share] {
-            get throws { try
-                (0 ..< metadata.share_count).map(UInt8.init).map {
-                    var out = UnoShare()
-                    let ret = C.uno_get_s93_share_by_index(metadata, $0, &out)
-                    if ret > 0 {
-                        throw Err.code(ret)
-                    }
-                    return Share(out)
+        // TODO: Swift 5.5
+//        public var shares: [Share] {
+//            get throws { try
+//                (0 ..< metadata.share_count).map(UInt8.init).map {
+//                    var out = UnoShare()
+//                    let ret = C.uno_get_s93_share_by_index(metadata, $0, &out)
+//                    if ret > 0 {
+//                        throw Err.code(ret)
+//                    }
+//                    return Share(out)
+//                }
+//            }
+//        }
+
+        public func getShares() throws -> [Share] {
+            try (0 ..< metadata.share_count).map(UInt8.init).map {
+                var out = UnoShare()
+                let ret = C.uno_get_s93_share_by_index(metadata, $0, &out)
+                if ret > 0 {
+                    throw Err.code(ret)
                 }
+                return Share(out)
             }
         }
     }
@@ -153,19 +175,33 @@ public struct S39 {
 
         /// Get additional information about the share. This call can fail if
         /// the backing library encounters an error.
-        public var metadata: Metadata {
-            get throws {
-                if let m = _metadata {
-                    return m
-                }
-                var out = Metadata()
-                let ret = C.uno_get_s39_share_metadata(cShare, &out)
-                if ret > 0 {
-                    throw Err.code(ret)
-                }
-                self._metadata = out
-                return out
+        // TODO: Swift 5.5
+//        public var metadata: Metadata {
+//            get throws {
+//                if let m = _metadata {
+//                    return m
+//                }
+//                var out = Metadata()
+//                let ret = C.uno_get_s39_share_metadata(cShare, &out)
+//                if ret > 0 {
+//                    throw Err.code(ret)
+//                }
+//                self._metadata = out
+//                return out
+//            }
+//        }
+
+        public func getMetadata() throws -> Metadata {
+            if let m = _metadata {
+                return m
             }
+            var out = Metadata()
+            let ret = C.uno_get_s39_share_metadata(cShare, &out)
+            if ret > 0 {
+                throw Err.code(ret)
+            }
+            self._metadata = out
+            return out
         }
     }
     
