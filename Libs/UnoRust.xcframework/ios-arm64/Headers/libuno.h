@@ -293,13 +293,22 @@ void uno_free_group_split(UnoGroupSplit group_split);
  * Returns the actual member share by index.
  *
  */
-int uno_get_s93_share_by_index(UnoGroupSplit group_split,
+int uno_get_s39_share_by_index(UnoGroupSplit group_split,
                                uint8_t index,
                                UnoShare *out);
 
 /**
  *
- * Free a previously allocated share returned by `uno_get_s39_share_by_index`.
+ * Convert a mnemonic string of 33 space separated words to an internal share
+ * representation.
+ *
+ */
+int uno_get_s39_share_from_mnemonic(const char *ptr, UnoShare *out);
+
+/**
+ *
+ * Free a previously allocated share returned by `uno_get_s39_share_by_index`
+ * or `uno_get_s39_share_from_mnemonic`.
  *
  */
 void uno_free_s39_share(UnoShare share);

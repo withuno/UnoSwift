@@ -129,7 +129,7 @@ public struct S39 {
         public func getShares() throws -> [Share] {
             try (0 ..< metadata.share_count).map(UInt8.init).map {
                 var out = UnoShare()
-                let ret = C.uno_get_s93_share_by_index(metadata, $0, &out)
+                let ret = C.uno_get_s39_share_by_index(metadata, $0, &out)
                 if ret > 0 {
                     throw Err.code(ret)
                 }
@@ -151,15 +151,14 @@ public struct S39 {
 
         private var _metadata: Metadata?
 
-        // TODO: make this type of thing possible
-//        public convenience init(mnemonic: String) throws {
-//            var out = C.UnoShare()
-//            let ret = C.uno_get_share_from_mnemonic(mnemonic, &out)
-//            if ret > 0 {
-//                throw Err.Code(ret)
-//            }
-//            self.init(out)
-//        }
+        public convenience init(mnemonic m: String) throws {
+            var out = C.UnoShare()
+            let ret = C.uno_get_s39_share_from_mnemonic(m, &out)
+            if ret > 0 {
+                throw Err.code(ret)
+            }
+            self.init(out)
+        }
 
         init(_ c: C.UnoShare) {
             self.cShare = c
@@ -231,11 +230,13 @@ public struct S39 {
     ///
     /// Reconstitute an uno ID previously split into a group of shares.
     ///
-    public static func combine(shares: [String]) throws -> ID {
+    public static func combine(shares: [Share]) throws -> ID {
+        let mnemonics = shares.map { $0.mnemonic }
         var out: OpaquePointer?
-        let ret = withArrayOfCStrings(shares) { arr -> Int32 in
+        // TODO: rework ffi so we can just pass array of shares...
+        let ret = withArrayOfCStrings(mnemonics) { arr -> Int32 in
             let const_arr = arr.map { UnsafePointer($0) }
-            return C.uno_s39_combine(const_arr, shares.count, &out)
+            return C.uno_s39_combine(const_arr, mnemonics.count, &out)
         }
         if ret > 0 {
             throw Err.code(ret)
@@ -243,9 +244,6 @@ public struct S39 {
         let id = out! // UnoId
         return ID(id)
     }
-
-    // TODO: make this type of thing possible
-    //func combine(shares: [Share]) throws -> Id {
 }
 
 //
