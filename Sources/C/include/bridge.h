@@ -5,4 +5,4 @@
 
 #define UNO_C_VERSION 1
 
-#include "libuno.h"
+#include "uno.h"
