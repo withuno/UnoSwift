@@ -42,18 +42,18 @@ public class ID {
     ///
     /// Get the bytes backing the uno Id.
     ///
-    // TODO: Swift 5.5
-//    public var bytes: [UInt8] {
-//        get throws {
-//            var out = Array<UInt8>(repeating: 0, count: 32)
-//            let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
-//            if ret > 0 {
-//                throw Err.code(ret)
-//            }
-//            return out
-//        }
-//    }
+    public var bytes: [UInt8] {
+        get throws {
+            var out = Array<UInt8>(repeating: 0, count: 32)
+            let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
+            if ret > 0 {
+                throw Err.code(ret)
+            }
+            return out
+        }
+    }
 
+    @available(swift, deprecated: 5.5, message: "use the property instead")
     public func getBytes() throws -> [UInt8] {
         var out = Array<UInt8>(repeating: 0, count: 32)
         let ret = C.uno_copy_id_bytes(ptr, &out, out.count)
@@ -111,21 +111,23 @@ public struct S39 {
             C.uno_free_group_split(metadata)
         }
 
+        ///
         /// The constituent member shares.
-        // TODO: Swift 5.5
-//        public var shares: [Share] {
-//            get throws { try
-//                (0 ..< metadata.share_count).map(UInt8.init).map {
-//                    var out = UnoShare()
-//                    let ret = C.uno_get_s93_share_by_index(metadata, $0, &out)
-//                    if ret > 0 {
-//                        throw Err.code(ret)
-//                    }
-//                    return Share(out)
-//                }
-//            }
-//        }
+        ///
+        public var shares: [Share] {
+            get throws { try
+                (0 ..< metadata.share_count).map(UInt8.init).map {
+                    var out = UnoShare()
+                    let ret = C.uno_get_s39_share_by_index(metadata, $0, &out)
+                    if ret > 0 {
+                        throw Err.code(ret)
+                    }
+                    return Share(out)
+                }
+            }
+        }
 
+        @available(swift, deprecated: 5.5, message: "use the property instead")
         public func getShares() throws -> [Share] {
             try (0 ..< metadata.share_count).map(UInt8.init).map {
                 var out = UnoShare()

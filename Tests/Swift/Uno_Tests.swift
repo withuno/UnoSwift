@@ -25,10 +25,10 @@ final class Functional: XCTestCase {
         let groups = try? Uno.S39.split(id: id!, specs: specs)
         XCTAssertNotNil(groups)
 
-        let shares = try! groups!.first!.getShares()
+        let shares = try! groups!.first!.shares
         let secret = try! Uno.S39.combine(shares: shares)
 
-        XCTAssertEqual(bytes, try! secret.getBytes())
+        XCTAssertEqual(bytes, try! secret.bytes)
     }
 
     func testS39roundtrip() {
@@ -42,13 +42,13 @@ final class Functional: XCTestCase {
         let groups = try? Uno.S39.split(id: id!, specs: specs)
         XCTAssertNotNil(groups)
 
-        let shares = try! groups!.first!.getShares()
+        let shares = try! groups!.first!.shares
 
         let secret1 = try! Uno.S39.combine(shares: Array(shares[0...1]))
         let secret2 = try! Uno.S39.combine(shares: Array(shares[1...2]))
 
-        XCTAssertEqual(bytes, try! secret1.getBytes())
-        XCTAssertEqual(bytes, try! secret2.getBytes())
+        XCTAssertEqual(bytes, try! secret1.bytes)
+        XCTAssertEqual(bytes, try! secret2.bytes)
     }
 
     func testS39metadata() {
